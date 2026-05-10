@@ -4,13 +4,16 @@ import { withTransaction } from '../../common/db/transaction-helper';
 import { Video, VideoStatus } from '../../common/models/video.model';
 import { Transcript } from '../../common/models/transcript.model';
 import { TranscriptChunk } from '../../common/models/transcript-chunk.model';
+import { Digest } from '../../common/models/digest.model';
 import { YouTubeUrlParser } from './utils/youtube-url-parser.util';
 import { VideosRepository } from './videos.repository';
 import { TranscriptService, TranscriptData } from './transcript.service';
 import { EmbeddingService } from './embedding.service';
-import { ImportVideoDto, ImportVideoResponseDto } from './types/videos.dtos';
+import { ImportVideoDto, ImportVideoResponseDto, CreateDigestResponseDto } from './types/videos.dtos';
 import { fetchTranscript } from 'youtube-transcript-plus';
 import { UnsupportedVideoError } from './errors/unsupported-video.error';
+import { VideoTooLongError } from './errors/video-too-long.error';
+import OpenAI from 'openai';
 
 interface VideoMetadata {
   title: string;
@@ -26,12 +29,17 @@ interface VideoMetadata {
 
 @Injectable()
 export class VideosService {
+  private readonly openai: OpenAI;
+  private readonly MVP_THRESHOLD_MINUTES = 30; // MVP threshold for video length
+
   constructor(
     private readonly videosRepository: VideosRepository,
     private readonly transcriptService: TranscriptService,
     private readonly embeddingService: EmbeddingService,
     private readonly sequelize: Sequelize,
-  ) {}
+  ) {
+    this.openai = new OpenAI();
+  }
 
   async importVideo(importVideoDto: ImportVideoDto): Promise<ImportVideoResponseDto> {
     const { url } = importVideoDto;
@@ -219,5 +227,84 @@ export class VideosService {
     }
 
     return undefined;
+  }
+
+  async generateDigest(videoId: number): Promise<CreateDigestResponseDto> {
+    // Load video + transcript
+    const video = await this.videosRepository.findVideoById(videoId);
+    if (!video) {
+      throw new Error('Video not found');
+    }
+
+    const transcript = await this.videosRepository.findTranscriptByVideoId(videoId);
+    if (!transcript) {
+      throw new Error('Transcript not found for this video');
+    }
+
+    // Check if transcript is too large for MVP threshold
+    const transcriptLength = transcript.rawText.length;
+    const estimatedVideoLengthMinutes = transcriptLength / 200; // Rough estimate: 200 chars per minute of speech
+    
+    if (estimatedVideoLengthMinutes > this.MVP_THRESHOLD_MINUTES) {
+      throw new VideoTooLongError(this.MVP_THRESHOLD_MINUTES);
+    }
+
+    // Generate digest using OpenAI
+    const digestContent = await this.generateDigestContent(transcript.rawText);
+
+    // Store result in Digest table via upsert
+    const digest = await this.videosRepository.upsertDigest(videoId, digestContent);
+
+    // Return digest content synchronously
+    return {
+      videoId: digest.videoId,
+      contentMarkdown: digest.contentMarkdown,
+    };
+  }
+
+  private async generateDigestContent(transcriptText: string): Promise<string> {
+    const systemPrompt = `You are an expert at creating concise, informative summaries from video transcripts. 
+
+Your task is to create a markdown digest that:
+- Summarizes only from the transcript content provided
+- Includes key takeaways and main points
+- Includes optional timestamp references only if available in the retrieved text/snippets
+- Avoids hallucinating anything not present in the transcript
+- Outputs clean markdown suitable for direct rendering in a frontend
+
+Format the output with:
+- A brief overview (2-3 sentences)
+- Key takeaways as bullet points
+- Main topics/sections with subheadings if applicable
+- Any important quotes or specific details mentioned
+
+Be concise but comprehensive. Focus on the most valuable information.`;
+
+    try {
+      const response = await this.openai.chat.completions.create({
+        model: 'gpt-4o-mini',
+        messages: [
+          {
+            role: 'system',
+            content: systemPrompt,
+          },
+          {
+            role: 'user',
+            content: `Please create a digest of the following video transcript:\n\n${transcriptText}`,
+          },
+        ],
+        temperature: 0.3,
+        max_tokens: 2000,
+      });
+
+      const content = response.choices[0]?.message?.content;
+      if (!content) {
+        throw new Error('Failed to generate digest content');
+      }
+
+      return content;
+    } catch (error: any) {
+      throw new Error(`Failed to generate digest: ${error.message}`);
+    }
   }
 }

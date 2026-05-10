@@ -6,6 +6,7 @@ import { withTransaction } from '../../common/db/transaction-helper';
 import { Video, VideoStatus } from '../../common/models/video.model';
 import { Transcript } from '../../common/models/transcript.model';
 import { TranscriptChunk } from '../../common/models/transcript-chunk.model';
+import { Digest } from '../../common/models/digest.model';
 
 @Injectable()
 export class VideosRepository {
@@ -28,6 +29,8 @@ export class VideosRepository {
     private readonly transcriptModel: typeof Transcript,
     @InjectModel(TranscriptChunk)
     private readonly transcriptChunkModel: typeof TranscriptChunk,
+    @InjectModel(Digest)
+    private readonly digestModel: typeof Digest,
     private readonly sequelize: Sequelize
   ) {}
 
@@ -83,6 +86,38 @@ export class VideosRepository {
     return this.transcriptChunkModel.destroy({
       where: { videoId },
       transaction
+    });
+  }
+
+  async findDigestByVideoId(videoId: number): Promise<Digest | null> {
+    return this.digestModel.findOne({
+      where: { videoId }
+    });
+  }
+
+  async upsertDigest(videoId: number, contentMarkdown: string): Promise<Digest> {
+    return withTransaction<Digest>(this.sequelize, async (transaction) => {
+      const existingDigest = await this.digestModel.findOne({
+        where: { videoId },
+        transaction
+      });
+
+      if (existingDigest) {
+        await existingDigest.update({ contentMarkdown }, { transaction });
+        return existingDigest.reload();
+      } else {
+        return this.digestModel.create({
+          videoId,
+          contentMarkdown
+        }, { transaction });
+      }
+    });
+  }
+
+  async findVideoById(videoId: number): Promise<Video | null> {
+    return this.videoModel.findOne({
+      where: { id: videoId },
+      attributes: this.videoAttributes
     });
   }
 }

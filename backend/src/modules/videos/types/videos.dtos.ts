@@ -24,3 +24,14 @@ export class ImportVideoResponseDto {
   status: string;
   title: string;
 }
+
+export class CreateDigestResponseDto {
+  videoId: number;
+  contentMarkdown: string;
+}
+
+export class VideoTooLongErrorDto {
+  error: string;
+  message: string;
+  maxVideoLengthMinutes: number;
+}
