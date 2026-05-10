@@ -52,7 +52,7 @@ export class TranscriptChunk extends Model {
   content!: string;
 
   @Column({
-    type: 'VECTOR(1536)',
+    type: 'VECTOR(768)',
     allowNull: true,
   })
   embedding?: number[];

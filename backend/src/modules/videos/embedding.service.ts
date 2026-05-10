@@ -1,67 +1,47 @@
 import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import OpenAI from 'openai';
+import { Ollama } from 'ollama';
 
 @Injectable()
 export class EmbeddingService {
-  private readonly openai: OpenAI | null;
+  private readonly ollama: Ollama;
+  private readonly embeddingModel: string;
 
   constructor(private readonly configService: ConfigService) {
-    const apiKey = this.configService.get<string>('OPENAI_API_KEY');
-    if (!apiKey || apiKey === 'your_openai_api_key_here') {
-      console.warn('OPENAI_API_KEY environment variable is not set. EmbeddingService will use mock embeddings for testing.');
-      this.openai = null;
-      return;
-    }
-
-    this.openai = new OpenAI({
-      apiKey,
+    this.ollama = new Ollama({
+      host: this.configService.get<string>('OLLAMA_BASE_URL') || 'http://localhost:11434',
     });
+    this.embeddingModel = this.configService.get<string>('OLLAMA_EMBEDDING_MODEL') || 'nomic-embed-text';
   }
 
   async generateEmbeddings(texts: string[]): Promise<number[][]> {
-    // Return mock embeddings if OpenAI client is not available
-    if (!this.openai) {
-      return texts.map(() => Array(1536).fill(0).map(() => Math.random()));
-    }
-
-    const embeddings: number[][] = [];
-
-    // Process in batches to handle rate limits
-    const batchSize = 100;
-    for (let i = 0; i < texts.length; i += batchSize) {
-      const batch = texts.slice(i, i + batchSize);
-      
-      try {
-        const response = await this.openai.embeddings.create({
-          model: 'text-embedding-3-small',
-          input: batch,
-        });
-
-        const batchEmbeddings = response.data.map(item => item.embedding);
-        embeddings.push(...batchEmbeddings);
-      } catch (error: any) {
-        throw new Error(`Failed to generate embeddings for batch ${i}-${i + batch.length}: ${error.message}`);
+    try {
+      const response = await this.ollama.embed({
+        model: this.embeddingModel,
+        input: texts,
+      });
+      return response.embeddings;
+    } catch (error: any) {
+      // Check if Ollama is not running
+      if (error.code === 'ECONNREFUSED' || error.message.includes('ECONNREFUSED')) {
+        throw new Error('Ollama is not running. Start it with: ollama serve');
       }
+      throw new Error(`Failed to generate embeddings: ${error.message}`);
     }
-
-    return embeddings;
   }
 
   async generateSingleEmbedding(text: string): Promise<number[]> {
-    // Return mock embedding if OpenAI client is not available
-    if (!this.openai) {
-      return Array(1536).fill(0).map(() => Math.random());
-    }
-
     try {
-      const response = await this.openai.embeddings.create({
-        model: 'text-embedding-3-small',
+      const response = await this.ollama.embed({
+        model: this.embeddingModel,
         input: text,
       });
-
-      return response.data[0].embedding;
+      return response.embeddings[0];
     } catch (error: any) {
+      // Check if Ollama is not running
+      if (error.code === 'ECONNREFUSED' || error.message.includes('ECONNREFUSED')) {
+        throw new Error('Ollama is not running. Start it with: ollama serve');
+      }
       throw new Error(`Failed to generate embedding: ${error.message}`);
     }
   }

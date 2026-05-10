@@ -8,9 +8,13 @@ import { TranscriptService } from './transcript.service';
 import { VideosController } from './videos.controller';
 import { VideosRepository } from './videos.repository';
 import { VideosService } from './videos.service';
+import { OllamaModule } from '../ollama/ollama.module';
 
 @Module({
-  imports: [SequelizeModule.forFeature([Video, Transcript, TranscriptChunk])],
+  imports: [
+    SequelizeModule.forFeature([Video, Transcript, TranscriptChunk]),
+    OllamaModule
+  ],
   controllers: [VideosController],
   providers: [
     VideosRepository,

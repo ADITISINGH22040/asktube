@@ -9,11 +9,11 @@ import { YouTubeUrlParser } from './utils/youtube-url-parser.util';
 import { VideosRepository } from './videos.repository';
 import { TranscriptService, TranscriptData } from './transcript.service';
 import { EmbeddingService } from './embedding.service';
+import { OllamaService } from '../../common/services/ollama.service';
 import { ImportVideoDto, ImportVideoResponseDto, CreateDigestResponseDto } from './types/videos.dtos';
 import { fetchTranscript } from 'youtube-transcript-plus';
 import { UnsupportedVideoError } from './errors/unsupported-video.error';
 import { VideoTooLongError } from './errors/video-too-long.error';
-import OpenAI from 'openai';
 
 interface VideoMetadata {
   title: string;
@@ -29,17 +29,15 @@ interface VideoMetadata {
 
 @Injectable()
 export class VideosService {
-  private readonly openai: OpenAI;
   private readonly MVP_THRESHOLD_MINUTES = 30; // MVP threshold for video length
 
   constructor(
     private readonly videosRepository: VideosRepository,
     private readonly transcriptService: TranscriptService,
     private readonly embeddingService: EmbeddingService,
+    private readonly ollamaService: OllamaService,
     private readonly sequelize: Sequelize,
-  ) {
-    this.openai = new OpenAI();
-  }
+  ) {}
 
   async importVideo(importVideoDto: ImportVideoDto): Promise<ImportVideoResponseDto> {
     const { url } = importVideoDto;
@@ -281,23 +279,20 @@ Format the output with:
 Be concise but comprehensive. Focus on the most valuable information.`;
 
     try {
-      const response = await this.openai.chat.completions.create({
-        model: 'gpt-4o-mini',
-        messages: [
-          {
-            role: 'system',
-            content: systemPrompt,
-          },
-          {
-            role: 'user',
-            content: `Please create a digest of the following video transcript:\n\n${transcriptText}`,
-          },
-        ],
+      const content = await this.ollamaService.createChatCompletion([
+        {
+          role: 'system',
+          content: systemPrompt,
+        },
+        {
+          role: 'user',
+          content: `Please create a digest of the following video transcript:\n\n${transcriptText}`,
+        },
+      ], {
         temperature: 0.3,
-        max_tokens: 2000,
+        maxTokens: 2000,
       });
 
-      const content = response.choices[0]?.message?.content;
       if (!content) {
         throw new Error('Failed to generate digest content');
       }

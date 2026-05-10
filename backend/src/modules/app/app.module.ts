@@ -1,10 +1,10 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { databaseConfig, httpConfig } from '../../config/app.conf';
-import { openaiConfig } from '../../config/openai.conf';
+import { ollamaConfig } from '../../config/ollama.conf';
 import { DatabaseModule } from '../database/database.module';
 import { HealthModule } from '../health/health.module';
-import { OpenAIModule } from '../openai/openai.module';
+import { OllamaModule } from '../ollama/ollama.module';
 import { VideosModule } from '../videos/videos.module';
 
 @Module({
@@ -14,12 +14,12 @@ import { VideosModule } from '../videos/videos.module';
       load: [
         () => ({ http: httpConfig() }),
         () => ({ database: databaseConfig() }),
-        openaiConfig
+        ollamaConfig
       ]
     }),
     DatabaseModule,
     HealthModule,
-    OpenAIModule,
+    OllamaModule,
     VideosModule
   ]
 })
