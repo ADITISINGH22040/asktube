@@ -1,12 +1,12 @@
-import { Table, Column, Model, DataType, HasMany } from 'sequelize-typescript';
-import { Transcript } from './transcript.model';
-import { TranscriptChunk } from './transcript-chunk.model';
-import { Digest } from './digest.model';
+import {Table, Column, Model, DataType, HasMany} from 'sequelize-typescript';
+import {Transcript} from './transcript.model';
+import {TranscriptChunk} from './transcript-chunk.model';
+import {Digest} from './digest.model';
 
 export enum VideoStatus {
   IMPORTING = 'IMPORTING',
   READY = 'READY',
-  FAILED = 'FAILED',
+  FAILED = 'FAILED'
 }
 
 @Table({
@@ -15,51 +15,48 @@ export enum VideoStatus {
     {
       unique: true,
       fields: ['youtubeId'],
-      name: 'videos_youtube_id_unique',
-    },
-  ],
+      name: 'videos_youtube_id_unique'
+    }
+  ]
 })
 export class Video extends Model {
-
   @Column({
     type: DataType.STRING,
     allowNull: false,
-    unique: true,
+    unique: true
   })
   youtubeId!: string;
 
   @Column({
     type: DataType.TEXT,
-    allowNull: false,
+    allowNull: false
   })
   url!: string;
 
   @Column({
     type: DataType.TEXT,
-    allowNull: false,
+    allowNull: false
   })
   title!: string;
 
   @Column({
     type: DataType.TEXT,
-    allowNull: false,
+    allowNull: false
   })
   channelName!: string;
 
   @Column({
     type: DataType.TEXT,
-    allowNull: true,
+    allowNull: true
   })
   thumbnailUrl?: string;
 
   @Column({
     type: DataType.ENUM(...Object.values(VideoStatus)),
     allowNull: false,
-    defaultValue: VideoStatus.IMPORTING,
+    defaultValue: VideoStatus.IMPORTING
   })
   status!: VideoStatus;
-
-
 
   @HasMany(() => Transcript)
   transcripts!: Transcript[];

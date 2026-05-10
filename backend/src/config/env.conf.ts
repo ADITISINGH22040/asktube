@@ -1,6 +1,6 @@
 import 'dotenv/config';
 
-export function parseDbUrl(urlString: string | undefined): { url: string; schema: string } {
+export function parseDbUrl(urlString: string | undefined): {url: string; schema: string} {
   if (!urlString) {
     throw new Error('DATABASE_URL is required');
   }
@@ -16,5 +16,5 @@ export function parseDbUrl(urlString: string | undefined): { url: string; schema
   const schema = url.searchParams.get('schema') ?? 'public';
   url.searchParams.delete('schema');
 
-  return { url: url.href, schema };
+  return {url: url.href, schema};
 }

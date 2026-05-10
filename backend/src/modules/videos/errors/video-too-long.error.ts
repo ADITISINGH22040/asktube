@@ -1,4 +1,4 @@
-import { HttpException, HttpStatus } from '@nestjs/common';
+import {HttpException, HttpStatus} from '@nestjs/common';
 
 export class VideoTooLongError extends HttpException {
   constructor(maxVideoLengthMinutes: number) {
@@ -6,9 +6,9 @@ export class VideoTooLongError extends HttpException {
       {
         error: 'VideoTooLongError',
         message: `v1 supports short/medium videos only. Videos longer than ${maxVideoLengthMinutes} minutes are not supported.`,
-        maxVideoLengthMinutes,
+        maxVideoLengthMinutes
       },
-      HttpStatus.BAD_REQUEST,
+      HttpStatus.BAD_REQUEST
     );
   }
 }

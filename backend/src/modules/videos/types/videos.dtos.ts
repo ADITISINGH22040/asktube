@@ -1,4 +1,4 @@
-import { IsString, IsNotEmpty, IsUrl } from 'class-validator';
+import {IsString, IsNotEmpty, IsUrl} from 'class-validator';
 
 export class ImportVideoDto {
   @IsString()
@@ -28,6 +28,21 @@ export class ImportVideoResponseDto {
 export class CreateDigestResponseDto {
   videoId: number;
   contentMarkdown: string;
+}
+
+export class AskVideoDto {
+  @IsString()
+  @IsNotEmpty()
+  question: string;
+}
+
+export class AskVideoResponseDto {
+  answer: string;
+  sources: Array<{
+    chunkIndex: number;
+    startSec?: number;
+    endSec?: number;
+  }>;
 }
 
 export class VideoTooLongErrorDto {

@@ -10,5 +10,5 @@ function getDbUrl(): string | undefined {
 export const DATABASE_URL = getDbUrl();
 
 export const DATABASE_SCHEMA = DATABASE_URL
-  ? new URL(DATABASE_URL).searchParams.get('schema') ?? 'public'
+  ? (new URL(DATABASE_URL).searchParams.get('schema') ?? 'public')
   : 'public';

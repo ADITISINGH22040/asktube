@@ -1,26 +1,23 @@
-import { Table, Column, Model, DataType, BelongsTo, ForeignKey } from 'sequelize-typescript';
-import { Video } from './video.model';
+import {Table, Column, Model, DataType, BelongsTo, ForeignKey} from 'sequelize-typescript';
+import {Video} from './video.model';
 
 @Table({
-  tableName: 'digests',
+  tableName: 'digests'
 })
 export class Digest extends Model {
-
   @ForeignKey(() => Video)
   @Column({
     type: DataType.INTEGER,
     allowNull: false,
-    unique: true,
+    unique: true
   })
   videoId!: number;
 
   @Column({
     type: DataType.TEXT('long'),
-    allowNull: false,
+    allowNull: false
   })
   contentMarkdown!: string;
-
-
 
   @BelongsTo(() => Video)
   video!: Video;

@@ -1,4 +1,4 @@
-import { QueryInterface, DataTypes } from 'sequelize';
+import {QueryInterface, DataTypes} from 'sequelize';
 
 module.exports = {
   up: async (queryInterface: QueryInterface) => {
@@ -6,7 +6,7 @@ module.exports = {
       id: {
         type: DataTypes.INTEGER,
         primaryKey: true,
-        autoIncrement: true,
+        autoIncrement: true
       },
       videoId: {
         type: DataTypes.INTEGER,
@@ -14,31 +14,31 @@ module.exports = {
         unique: true,
         references: {
           model: 'videos',
-          key: 'id',
+          key: 'id'
         },
         onUpdate: 'CASCADE',
-        onDelete: 'CASCADE',
+        onDelete: 'CASCADE'
       },
       language: {
         type: DataTypes.STRING,
-        allowNull: false,
+        allowNull: false
       },
       rawText: {
         type: DataTypes.TEXT('long'),
-        allowNull: false,
+        allowNull: false
       },
       createdAt: {
         type: DataTypes.DATE,
-        allowNull: false,
+        allowNull: false
       },
       updatedAt: {
         type: DataTypes.DATE,
-        allowNull: false,
-      },
+        allowNull: false
+      }
     });
   },
 
   down: async (queryInterface: QueryInterface) => {
     await queryInterface.dropTable('transcripts');
-  },
+  }
 };

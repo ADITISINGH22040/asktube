@@ -1,4 +1,4 @@
-import { CustomHttpError } from '../../../common/errors/custom.error';
+import {CustomHttpError} from '../../../common/errors/custom.error';
 
 export class UnsupportedVideoError extends CustomHttpError {
   constructor(url: string) {

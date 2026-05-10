@@ -1,6 +1,6 @@
-import { Injectable } from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
-import { Ollama } from 'ollama';
+import {Injectable} from '@nestjs/common';
+import {ConfigService} from '@nestjs/config';
+import {Ollama} from 'ollama';
 
 @Injectable()
 export class EmbeddingService {
@@ -9,16 +9,17 @@ export class EmbeddingService {
 
   constructor(private readonly configService: ConfigService) {
     this.ollama = new Ollama({
-      host: this.configService.get<string>('OLLAMA_BASE_URL') || 'http://localhost:11434',
+      host: this.configService.get<string>('OLLAMA_BASE_URL') || 'http://localhost:11434'
     });
-    this.embeddingModel = this.configService.get<string>('OLLAMA_EMBEDDING_MODEL') || 'nomic-embed-text';
+    this.embeddingModel =
+      this.configService.get<string>('OLLAMA_EMBEDDING_MODEL') || 'nomic-embed-text';
   }
 
   async generateEmbeddings(texts: string[]): Promise<number[][]> {
     try {
       const response = await this.ollama.embed({
         model: this.embeddingModel,
-        input: texts,
+        input: texts
       });
       return response.embeddings;
     } catch (error: any) {
@@ -34,7 +35,7 @@ export class EmbeddingService {
     try {
       const response = await this.ollama.embed({
         model: this.embeddingModel,
-        input: text,
+        input: text
       });
       return response.embeddings[0];
     } catch (error: any) {

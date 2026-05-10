@@ -12,7 +12,7 @@ export class YouTubeUrlParser {
     // TV URLs
     /^https?:\/\/(?:www\.)?youtube\.com\/tv\/#\/watch\?v=([a-zA-Z0-9_-]{11})/,
     // Additional patterns
-    /^https?:\/\/(?:www\.)?youtube\.com\/watch\?.*v=([a-zA-Z0-9_-]{11})/,
+    /^https?:\/\/(?:www\.)?youtube\.com\/watch\?.*v=([a-zA-Z0-9_-]{11})/
   ];
 
   static extractYoutubeId(url: string): string {

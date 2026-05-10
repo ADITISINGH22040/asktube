@@ -1,4 +1,4 @@
-import { CustomHttpError } from '../../../common/errors/custom.error';
+import {CustomHttpError} from '../../../common/errors/custom.error';
 
 export class TranscriptNotFoundError extends CustomHttpError {
   constructor(videoId: string) {

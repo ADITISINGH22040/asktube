@@ -1,4 +1,4 @@
-import { QueryInterface, DataTypes } from 'sequelize';
+import {QueryInterface, DataTypes} from 'sequelize';
 
 module.exports = {
   up: async (queryInterface: QueryInterface) => {
@@ -6,65 +6,65 @@ module.exports = {
       id: {
         type: DataTypes.INTEGER,
         primaryKey: true,
-        autoIncrement: true,
+        autoIncrement: true
       },
       videoId: {
         type: DataTypes.INTEGER,
         allowNull: false,
         references: {
           model: 'videos',
-          key: 'id',
+          key: 'id'
         },
         onUpdate: 'CASCADE',
-        onDelete: 'CASCADE',
+        onDelete: 'CASCADE'
       },
       transcriptId: {
         type: DataTypes.INTEGER,
         allowNull: false,
         references: {
           model: 'transcripts',
-          key: 'id',
+          key: 'id'
         },
         onUpdate: 'CASCADE',
-        onDelete: 'CASCADE',
+        onDelete: 'CASCADE'
       },
       chunkIndex: {
         type: DataTypes.INTEGER,
-        allowNull: false,
+        allowNull: false
       },
       startSec: {
         type: DataTypes.DECIMAL(10, 3),
-        allowNull: true,
+        allowNull: true
       },
       endSec: {
         type: DataTypes.DECIMAL(10, 3),
-        allowNull: true,
+        allowNull: true
       },
       content: {
         type: DataTypes.TEXT('long'),
-        allowNull: false,
+        allowNull: false
       },
       embedding: {
         type: 'VECTOR(1536)',
-        allowNull: true,
+        allowNull: true
       },
       createdAt: {
         type: DataTypes.DATE,
-        allowNull: false,
+        allowNull: false
       },
       updatedAt: {
         type: DataTypes.DATE,
-        allowNull: false,
-      },
+        allowNull: false
+      }
     });
 
     await queryInterface.addIndex('transcript_chunks', ['videoId', 'chunkIndex'], {
       unique: false,
-      name: 'transcript_chunks_video_id_chunk_index',
+      name: 'transcript_chunks_video_id_chunk_index'
     });
   },
 
   down: async (queryInterface: QueryInterface) => {
     await queryInterface.dropTable('transcript_chunks');
-  },
+  }
 };

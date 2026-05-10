@@ -1,4 +1,4 @@
-import { QueryInterface, DataTypes } from 'sequelize';
+import {QueryInterface, DataTypes} from 'sequelize';
 
 module.exports = {
   up: async (queryInterface: QueryInterface) => {
@@ -7,5 +7,5 @@ module.exports = {
 
   down: async (queryInterface: QueryInterface) => {
     await queryInterface.sequelize.query('DROP EXTENSION IF EXISTS vector;');
-  },
+  }
 };

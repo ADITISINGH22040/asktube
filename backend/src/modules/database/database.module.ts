@@ -1,9 +1,9 @@
-import { Module } from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
-import { SequelizeModule, SequelizeModuleOptions } from '@nestjs/sequelize';
-import { Sequelize } from 'sequelize-typescript';
+import {Module} from '@nestjs/common';
+import {ConfigService} from '@nestjs/config';
+import {SequelizeModule, SequelizeModuleOptions} from '@nestjs/sequelize';
+import {Sequelize} from 'sequelize-typescript';
 import * as models from '../../common/models';
-import { DatabaseConfig } from '../../config/app.conf';
+import {DatabaseConfig} from '../../config/app.conf';
 
 @Module({
   imports: [

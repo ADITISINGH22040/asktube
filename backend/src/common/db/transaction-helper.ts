@@ -1,4 +1,4 @@
-import { Sequelize, Transaction } from 'sequelize';
+import {Sequelize, Transaction} from 'sequelize';
 
 export async function withTransaction<T>(
   sequelize: Sequelize,
