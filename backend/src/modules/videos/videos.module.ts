@@ -3,6 +3,7 @@ import { SequelizeModule } from '@nestjs/sequelize';
 import { Video } from '../../common/models/video.model';
 import { Transcript } from '../../common/models/transcript.model';
 import { TranscriptChunk } from '../../common/models/transcript-chunk.model';
+import { Digest } from '../../common/models/digest.model';
 import { EmbeddingService } from './embedding.service';
 import { TranscriptService } from './transcript.service';
 import { VideosController } from './videos.controller';
@@ -12,7 +13,7 @@ import { OllamaModule } from '../ollama/ollama.module';
 
 @Module({
   imports: [
-    SequelizeModule.forFeature([Video, Transcript, TranscriptChunk]),
+    SequelizeModule.forFeature([Video, Transcript, TranscriptChunk, Digest]),
     OllamaModule
   ],
   controllers: [VideosController],

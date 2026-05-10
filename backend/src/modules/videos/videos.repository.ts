@@ -104,7 +104,8 @@ export class VideosRepository {
 
       if (existingDigest) {
         await existingDigest.update({ contentMarkdown }, { transaction });
-        return existingDigest.reload();
+        await existingDigest.reload();
+        return existingDigest;
       } else {
         return this.digestModel.create({
           videoId,

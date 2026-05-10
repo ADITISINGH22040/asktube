@@ -239,24 +239,32 @@ export class VideosService {
       throw new Error('Transcript not found for this video');
     }
 
+    // Get rawText using Sequelize's get() method to avoid field shadowing
+    const rawText = transcript.get('rawText') as string;
+    
+    // Validate transcript has content
+    if (!rawText || rawText.trim().length === 0) {
+      throw new Error(`Video ${videoId} has a transcript record but no transcript content. The video may need to be re-imported to fetch the transcript data.`);
+    }
+
     // Check if transcript is too large for MVP threshold
-    const transcriptLength = transcript.rawText.length;
+    const transcriptLength = rawText.length;
     const estimatedVideoLengthMinutes = transcriptLength / 200; // Rough estimate: 200 chars per minute of speech
     
     if (estimatedVideoLengthMinutes > this.MVP_THRESHOLD_MINUTES) {
       throw new VideoTooLongError(this.MVP_THRESHOLD_MINUTES);
     }
 
-    // Generate digest using OpenAI
-    const digestContent = await this.generateDigestContent(transcript.rawText);
+    // Generate digest using Ollama
+    const digestContent = await this.generateDigestContent(rawText);
 
     // Store result in Digest table via upsert
     const digest = await this.videosRepository.upsertDigest(videoId, digestContent);
 
     // Return digest content synchronously
     return {
-      videoId: digest.videoId,
-      contentMarkdown: digest.contentMarkdown,
+      videoId: digest.get('videoId') as number,
+      contentMarkdown: digest.get('contentMarkdown') as string,
     };
   }
 
@@ -279,19 +287,25 @@ Format the output with:
 Be concise but comprehensive. Focus on the most valuable information.`;
 
     try {
-      const content = await this.ollamaService.createChatCompletion([
-        {
-          role: 'system',
-          content: systemPrompt,
-        },
-        {
-          role: 'user',
-          content: `Please create a digest of the following video transcript:\n\n${transcriptText}`,
-        },
-      ], {
-        temperature: 0.3,
-        maxTokens: 2000,
-      });
+      // Add timeout to prevent hanging
+      const content = await Promise.race([
+        this.ollamaService.createChatCompletion([
+          {
+            role: 'system',
+            content: systemPrompt,
+          },
+          {
+            role: 'user',
+            content: `Please create a digest of the following video transcript:\n\n${transcriptText}`,
+          },
+        ], {
+          temperature: 0.3,
+          maxTokens: 2000,
+        }),
+        new Promise((_, reject) => 
+          setTimeout(() => reject(new Error('Ollama request timeout')), 30000)
+        )
+      ]) as string;
 
       if (!content) {
         throw new Error('Failed to generate digest content');
@@ -299,6 +313,12 @@ Be concise but comprehensive. Focus on the most valuable information.`;
 
       return content;
     } catch (error: any) {
+      if (error.message.includes('Ollama is not running')) {
+        throw error;
+      }
+      if (error.message.includes('Ollama request timeout')) {
+        throw new Error('Ollama request timed out. Make sure Ollama is running and the required models are downloaded.');
+      }
       throw new Error(`Failed to generate digest: ${error.message}`);
     }
   }
