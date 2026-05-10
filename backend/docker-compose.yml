@@ -1,0 +1,16 @@
+version: '3'
+name: backend
+services:
+  postgres:
+    image: pgvector/pgvector:pg15
+    ports:
+      - 5434:5432
+    volumes:
+      - backend-postgres-data:/var/lib/postgresql/data
+    environment:
+      - POSTGRES_USER=user
+      - POSTGRES_PASSWORD=password
+      - POSTGRES_DB=backend_db
+
+volumes:
+  backend-postgres-data:

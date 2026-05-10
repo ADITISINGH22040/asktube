@@ -1,0 +1,13 @@
+.vscode
+.idea
+/node_modules
+
+.eslintrc.js
+.eslintignore
+.editorconfig
+.prettierrc
+
+jest.config.js
+
+Dockerfile
+docker-compose.yml

@@ -1,0 +1,33 @@
+# Logs
+logs
+*.log
+npm-debug.log*
+
+# Runtime data
+pids
+*.pid
+*.seed
+*.pid.lock
+
+# Coverage
+coverage
+*.lcov
+
+# Dependencies
+node_modules/
+
+# TypeScript
+*.tsbuildinfo
+dist
+
+# dotenv
+.env
+.env.test
+
+# IDE
+.idea
+.vscode/launch.json
+*.DS_Store
+
+# Test reports
+results/
