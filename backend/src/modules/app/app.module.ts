@@ -5,7 +5,7 @@ import { openaiConfig } from '../../config/openai.conf';
 import { DatabaseModule } from '../database/database.module';
 import { HealthModule } from '../health/health.module';
 import { OpenAIModule } from '../openai/openai.module';
-import { UsersModule } from '../users/users.module';
+import { VideosModule } from '../videos/videos.module';
 
 @Module({
   imports: [
@@ -20,7 +20,7 @@ import { UsersModule } from '../users/users.module';
     DatabaseModule,
     HealthModule,
     OpenAIModule,
-    UsersModule
+    VideosModule
   ]
 })
 export class AppModule {}
