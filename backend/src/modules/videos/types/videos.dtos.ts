@@ -38,11 +38,6 @@ export class AskVideoDto {
 
 export class AskVideoResponseDto {
   answer: string;
-  sources: Array<{
-    chunkIndex: number;
-    startSec?: number;
-    endSec?: number;
-  }>;
 }
 
 export class VideoTooLongErrorDto {

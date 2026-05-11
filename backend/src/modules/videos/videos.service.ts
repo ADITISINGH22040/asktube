@@ -338,7 +338,6 @@ Be concise but comprehensive. Focus on the most valuable information.`;
     question: string
   ): Promise<{
     answer: string;
-    sources: Array<{chunkIndex: number; startSec?: number; endSec?: number}>;
   }> {
     // Verify video exists
     const video = await this.videosRepository.findVideoById(videoId);
@@ -361,8 +360,7 @@ Be concise but comprehensive. Focus on the most valuable information.`;
     if (relevantChunks.length === 0) {
       return {
         answer:
-          'I apologize, but I could not find any relevant transcript segments to answer your question. This video may not have transcript data available.',
-        sources: []
+          'I apologize, but I could not find any relevant transcript segments to answer your question. This video may not have transcript data available.'
       };
     }
 
@@ -397,16 +395,8 @@ Be concise but comprehensive. Focus on the most valuable information.`;
         throw new Error('Failed to generate answer');
       }
 
-      // Extract sources from chunks
-      const sources = relevantChunks.map((chunk) => ({
-        chunkIndex: chunk.chunkIndex,
-        startSec: chunk.startSec ? Number(chunk.startSec) : undefined,
-        endSec: chunk.endSec ? Number(chunk.endSec) : undefined
-      }));
-
       return {
-        answer,
-        sources
+        answer
       };
     } catch (error: any) {
       if (error.message.includes('Ollama is not running')) {
@@ -439,9 +429,10 @@ CRITICAL INSTRUCTIONS:
 - Answer ONLY using the provided transcript chunks
 - If the transcript chunks do not contain sufficient information to answer the question, explicitly state: "Based on the provided transcript segments, I don't have enough information to answer this question."
 - Do not use any external knowledge or information not present in the chunks
-- Be precise and cite specific information from the chunks when possible
+- Be precise and provide specific information from the chunks when possible
 - Keep answers concise but comprehensive
 - If timestamps are provided, you can reference them to indicate when information was discussed
+- Do NOT mention "Chunk", "chunks", or refer to chunk numbers in your answer
 
 Your answer must be grounded entirely in the provided transcript content.`;
 
