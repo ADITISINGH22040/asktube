@@ -21,26 +21,83 @@ AskTube solves these problems by:
 ## 🔄 Product Flow
 
 ```
-flowchart TD
-    A[Landing page] --> B[Paste YouTube URL]
-    B --> C[Import Video]
-    C --> D[Fetch metadata + transcript]
-    D --> E[Store video + transcript]
-    E --> F[Chunk transcript]
-    F --> G[Create embeddings]
-    G --> H[Store chunks + vectors]
-    H --> I[Video ready state]
-
-    I --> J[AI Digest button]
-    J --> K[Generate summary synchronously]
-    K --> L[Show digest]
-
-    I --> M[Ask AI input]
-    M --> N[Embed question]
-    N --> O[Retrieve top transcript chunks]
-    O --> P[Generate grounded answer]
-    P --> Q[Show answer]
-    Q --> M
+                              ┌──────────────────────┐
+                              │     Landing page     │
+                              └──────────┬───────────┘
+                                         │
+                                         ▼
+                              ┌──────────────────────┐
+                              │  Paste YouTube URL   │
+                              └──────────┬───────────┘
+                                         │
+                                         ▼
+                              ┌──────────────────────┐
+                              │    Import Video      │
+                              └──────────┬───────────┘
+                                         │
+                                         ▼
+                              ┌──────────────────────┐
+                              │ Fetch metadata +     │
+                              │     transcript       │
+                              └──────────┬───────────┘
+                                         │
+                                         ▼
+                              ┌──────────────────────┐
+                              │ Store video +        │
+                              │     transcript       │
+                              └──────────┬───────────┘
+                                         │
+                                         ▼
+                              ┌──────────────────────┐
+                              │  Chunk transcript    │
+                              └──────────┬───────────┘
+                                         │
+                                         ▼
+                              ┌──────────────────────┐
+                              │ Create embeddings    │
+                              └──────────┬───────────┘
+                                         │
+                                         ▼
+                              ┌──────────────────────┐
+                              │ Store chunks +       │
+                              │      vectors         │
+                              └──────────┬───────────┘
+                                         │
+                                         ▼
+                              ┌──────────────────────┐
+                              │ Video ready state    │
+                              └──────────┬───────────┘
+                                         │
+                    ┌────────────────────┴────────────────────┐
+                    │                                         │
+                    ▼                                         ▼
+         ┌──────────────────────┐               ┌──────────────────────┐
+         │  AI Digest button    │               │    Ask AI input      │
+         └──────────┬───────────┘               └──────────┬───────────┘
+                    │                                      │
+                    ▼                                      ▼
+         ┌──────────────────────┐               ┌──────────────────────┐
+         │ Generate summary     │               │   Embed user query   │
+         │   synchronously      │               └──────────┬───────────┘
+         └──────────┬───────────┘                          │
+                    │                                      ▼
+                    ▼                           ┌──────────────────────┐
+         ┌──────────────────────┐               │ Retrieve top         │
+         │     Show digest      │               │ transcript chunks    │
+         └──────────────────────┘               └──────────┬───────────┘
+                                                           │
+                                                           ▼
+                                                 ┌──────────────────────┐
+                                                 │ Generate grounded    │
+                                                 │       answer         │
+                                                 └──────────┬───────────┘
+                                                            │
+                                                            ▼
+                                                 ┌──────────────────────┐
+                                                 │    Show answer       │
+                                                 └──────────┬───────────┘
+                                                            │
+                                                            └──────────► (back to   Ask AI input)
 ```
 
 ## 🏗️ Architecture
