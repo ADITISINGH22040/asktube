@@ -1,7 +1,7 @@
 import {Injectable} from '@nestjs/common';
 import {fetchTranscript, TranscriptSegment} from 'youtube-transcript-plus';
+import {UnsupportedVideoError} from '../videos/errors/unsupported-video.error';
 import {TranscriptNotFoundError} from './errors/transcript-not-found.error';
-import {UnsupportedVideoError} from './errors/unsupported-video.error';
 
 export interface TranscriptData {
   rawText: string;
@@ -22,17 +22,14 @@ export class TranscriptService {
         videoDetails: true
       });
 
-      // Handle different response structures
       let segments: TranscriptSegment[];
       if (Array.isArray(response)) {
-        // Direct array of segments
         segments = response;
       } else if (
         response &&
         (response as any).segments &&
         Array.isArray((response as any).segments)
       ) {
-        // Response with videoDetails and segments
         segments = (response as any).segments;
       } else {
         throw new TranscriptNotFoundError(youtubeId);
@@ -42,10 +39,8 @@ export class TranscriptService {
         throw new TranscriptNotFoundError(youtubeId);
       }
 
-      // Extract language from first segment
       const language = segments[0] && segments[0].lang ? segments[0].lang : 'en';
 
-      // Create raw text by joining all segments
       const rawText = segments
         .filter((segment) => segment && segment.text)
         .map((segment) => segment.text)
@@ -53,7 +48,6 @@ export class TranscriptService {
         .replace(/\s+/g, ' ')
         .trim();
 
-      // Create snippets with timing information
       const snippets = segments
         .filter((segment) => segment && segment.text)
         .map((segment) => ({
@@ -68,7 +62,6 @@ export class TranscriptService {
         language
       };
     } catch (error: any) {
-      // Handle specific transcript errors
       if (
         error.message?.includes('No transcript available') ||
         error.message?.includes('captions') ||
@@ -77,7 +70,6 @@ export class TranscriptService {
         throw new TranscriptNotFoundError(youtubeId);
       }
 
-      // Handle invalid video ID or unsupported video
       if (
         error.message?.includes('Invalid video id') ||
         error.message?.includes('Video not found') ||
@@ -86,7 +78,6 @@ export class TranscriptService {
         throw new UnsupportedVideoError(youtubeId);
       }
 
-      // Re-throw other errors
       throw error;
     }
   }
@@ -120,7 +111,6 @@ export class TranscriptService {
       const snippet = snippets[snippetIndex];
       const snippetText = snippet.text;
 
-      // If adding this snippet would exceed chunk size and we already have content, create a chunk
       if (currentChunk && currentChunk.length + snippetText.length > chunkSize) {
         chunks.push({
           content: currentChunk.trim(),
@@ -128,14 +118,12 @@ export class TranscriptService {
           endSec: currentEndSec
         });
 
-        // Start new chunk with overlap
         const words = currentChunk.split(' ');
         const overlapWords = words.slice(-Math.min(overlap, words.length));
         currentChunk = overlapWords.join(' ') + ' ' + snippetText;
         currentStartSec = snippet.startSec;
         currentEndSec = snippet.endSec;
       } else {
-        // Add snippet to current chunk
         if (!currentChunk) {
           currentChunk = snippetText;
           currentStartSec = snippet.startSec;
@@ -148,7 +136,6 @@ export class TranscriptService {
       snippetIndex++;
     }
 
-    // Add final chunk if there's remaining content
     if (currentChunk.trim()) {
       chunks.push({
         content: currentChunk.trim(),

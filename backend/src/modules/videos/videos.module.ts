@@ -1,20 +1,23 @@
-import {Module} from '@nestjs/common';
+import {Module, forwardRef} from '@nestjs/common';
 import {SequelizeModule} from '@nestjs/sequelize';
 import {Video} from '../../common/models/video.model';
-import {Transcript} from '../../common/models/transcript.model';
-import {TranscriptChunk} from '../../common/models/transcript-chunk.model';
-import {Digest} from '../../common/models/digest.model';
-import {EmbeddingService} from './embedding.service';
-import {TranscriptService} from './transcript.service';
+import {DigestsModule} from '../digests/digests.module';
+import {OllamaModule} from '../ollama/ollama.module';
+import {TranscriptsModule} from '../transcripts/transcripts.module';
+import {VideoImportService} from './video-import.service';
+import {VideoQAService} from './video-qa.service';
 import {VideosController} from './videos.controller';
 import {VideosRepository} from './videos.repository';
-import {VideosService} from './videos.service';
-import {OllamaModule} from '../ollama/ollama.module';
 
 @Module({
-  imports: [SequelizeModule.forFeature([Video, Transcript, TranscriptChunk, Digest]), OllamaModule],
+  imports: [
+    SequelizeModule.forFeature([Video]),
+    TranscriptsModule,
+    forwardRef(() => DigestsModule),
+    OllamaModule
+  ],
   controllers: [VideosController],
-  providers: [VideosRepository, VideosService, TranscriptService, EmbeddingService],
-  exports: [VideosService, TranscriptService, EmbeddingService]
+  providers: [VideosRepository, VideoImportService, VideoQAService],
+  exports: [VideosRepository]
 })
 export class VideosModule {}

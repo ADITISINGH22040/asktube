@@ -23,7 +23,6 @@ export class EmbeddingService {
       });
       return response.embeddings;
     } catch (error: any) {
-      // Check if Ollama is not running
       if (error.code === 'ECONNREFUSED' || error.message.includes('ECONNREFUSED')) {
         throw new Error('Ollama is not running. Start it with: ollama serve');
       }
@@ -39,7 +38,6 @@ export class EmbeddingService {
       });
       return response.embeddings[0];
     } catch (error: any) {
-      // Check if Ollama is not running
       if (error.code === 'ECONNREFUSED' || error.message.includes('ECONNREFUSED')) {
         throw new Error('Ollama is not running. Start it with: ollama serve');
       }
