@@ -7,21 +7,19 @@ import {
   AskVideoDto,
   AskVideoResponseDto
 } from './types/videos.dtos';
-import {VideoImportService} from './video-import.service';
-import {VideoQAService} from './video-qa.service';
+import {VideosService} from './videos.service';
 
 @Controller('videos')
 export class VideosController {
   constructor(
-    private readonly videoImportService: VideoImportService,
-    private readonly digestsService: DigestsService,
-    private readonly videoQAService: VideoQAService
+    private readonly videosService: VideosService,
+    private readonly digestsService: DigestsService
   ) {}
 
   @Post('import')
   @HttpCode(HttpStatus.OK)
   async importVideo(@Body() importVideoDto: ImportVideoDto): Promise<ImportVideoResponseDto> {
-    return this.videoImportService.importVideo(importVideoDto);
+    return this.videosService.importVideo(importVideoDto);
   }
 
   @Post(':videoId/digest')
@@ -38,6 +36,6 @@ export class VideosController {
     @Param('videoId', ParseIntPipe) videoId: number,
     @Body() askVideoDto: AskVideoDto
   ): Promise<AskVideoResponseDto> {
-    return this.videoQAService.askVideoQuestion(videoId, askVideoDto.question);
+    return this.videosService.askVideoQuestion(videoId, askVideoDto.question);
   }
 }
