@@ -36,12 +36,6 @@ export class DigestsService {
       );
     }
 
-    const estimatedVideoLengthMinutes = rawText.length / 200;
-
-    if (estimatedVideoLengthMinutes > this.MVP_THRESHOLD_MINUTES) {
-      throw new VideoTooLongError(this.MVP_THRESHOLD_MINUTES);
-    }
-
     const digestContent = await this.generateDigestContent(rawText);
     const digest = await this.digestsRepository.upsertDigest(videoId, digestContent);
 
