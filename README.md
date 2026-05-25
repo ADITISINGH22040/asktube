@@ -18,6 +18,10 @@ AskTube solves these problems by:
 3. **Enabling interactive Q&A** to ask specific questions about video content
 4. **Providing source references** for all answers
 
+## Demo
+
+![AskTube — paste a YouTube URL on the landing page](./docs/demo.gif)
+
 ## 🔄 Product Flow
 
 ```
