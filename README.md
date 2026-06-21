@@ -174,6 +174,12 @@ npm run dev
 npm run migration:run
 ```
 
+### 5. Docker Setup
+```bash
+docker compose up -d
+docker compose down
+```
+
 ## 📁 Project Structure
 
 ```
